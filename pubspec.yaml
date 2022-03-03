@@ -23,6 +23,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+    
   app_usage: ^2.0.0 
   teledart: ^0.3.2
   http: ^0.13.4
@@ -35,6 +36,8 @@ dependencies:
   shared_preferences: ^2.0.12
   package_manager: ^1.8.0
   logger: ^1.1.0
+
+  
   
 
 dev_dependencies:
