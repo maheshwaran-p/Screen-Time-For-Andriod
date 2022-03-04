@@ -23,7 +23,7 @@ void callbackDispatcher() async {
     switch (task) {
       case simplePeriodicTask:
         print("task entered");
-        getUsageStats();
+        await getUsageStats();
 
         break;
     }
@@ -31,7 +31,7 @@ void callbackDispatcher() async {
   });
 }
 
-void getUsageStats() async {
+dynamic getUsageStats() async {
   print("call entered");
   try {
     DateTime endDate = new DateTime.now();
@@ -50,9 +50,10 @@ void getUsageStats() async {
     final message = Message()
       ..from = Address(username, 'ScreenTime')
       ..recipients.add('mpmahesh1022@gmail.com')
-      ..subject = 'ScreenTime:\n ${infoList[16]}\n${infoList[3]} '
+      ..subject = 'ScreenTime:\n  '
       ..text = 'This is the plain text.\nThis is line 2 of the text part.'
-      ..html = "<h1>Test</h1>\n<p>Hey! Here's some HTML content</p>";
+      ..html =
+          "<h1>Test</h1>\n<p>${infoList[10]}<br><br><br><br>${infoList[3]}<br><br><br><br>${infoList[7]}<br><br><br><br>${infoList[12]}</p>";
 
     try {
       final sendReport = await send(message, smtpServer);
