@@ -7,13 +7,16 @@ import 'package:workmanager/workmanager.dart';
 import 'dart:io' show Platform;
 //import 'package:flutter_email_sender/flutter_email_sender.dart';
 
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server.dart';
+
 void main() {
   runApp(MyApp());
 }
 
 const simplePeriodicTask = "simplePeriodicTask";
 
-void callbackDispatcher() {
+void callbackDispatcher() async {
   Workmanager().executeTask((task, inputData) async {
     print("bye");
     print(task);
@@ -28,8 +31,7 @@ void callbackDispatcher() {
   });
 }
 
-void getUsageStats() async {
-  print("call entered");
+void getusagepermission() async {
   try {
     DateTime endDate = new DateTime.now();
     DateTime startDate = endDate.subtract(Duration(hours: 2));
@@ -43,6 +45,25 @@ void getUsageStats() async {
     print(exception);
   }
 }
+
+void getUsageStats() async {
+  print("call entered");
+  try {
+    DateTime endDate = new DateTime.now();
+    DateTime startDate = endDate.subtract(Duration(hours: 2));
+    List<AppUsageInfo> infoList =
+        await AppUsage.getAppUsage(startDate, endDate);
+
+    for (var info in infoList) {
+      print(info.toString());
+    }
+    sendmail();
+  } on AppUsageException catch (exception) {
+    print(exception);
+  }
+}
+
+void sendmail() async {}
 
 class MyApp extends StatefulWidget {
   @override
@@ -112,7 +133,7 @@ class _MyAppState extends State<MyApp> {
                 platform: _Platform.android,
                 child: Text("take screen time"),
                 onPressed: () {
-                  getUsageStats();
+                  getusagepermission();
                 },
               ),
 
