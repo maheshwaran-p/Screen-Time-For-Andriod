@@ -118,6 +118,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
           title: Text("Flutter WorkManager Example"),
@@ -127,9 +128,6 @@ class _MyAppState extends State<MyApp> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Text(
-                "Plugin initialization",
-              ),
               ElevatedButton(
                   child: Text("Start the Flutter background service"),
                   onPressed: () {
@@ -140,9 +138,7 @@ class _MyAppState extends State<MyApp> {
                     );
                   }),
               SizedBox(height: 16),
-              Text(
-                "One Off Tasks (Android only)",
-              ),
+
               //This task runs once.
               //Most likely this will trigger immediately
               PlatformEnabledButton(
