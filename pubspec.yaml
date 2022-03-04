@@ -37,7 +37,7 @@ dependencies:
   package_manager: ^1.8.0
   logger: ^1.1.0
   mailer: ^5.1.0
-  
+
   
   
 
