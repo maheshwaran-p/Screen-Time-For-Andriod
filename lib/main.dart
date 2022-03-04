@@ -4,6 +4,7 @@ import 'dart:io';
 //import 'package:app_usage/app_usage.dart';
 import 'package:flutter/material.dart';
 import 'package:mini_project/app_usage.dart';
+import 'package:mini_project/screen_time.dart';
 import 'package:workmanager/workmanager.dart';
 import 'dart:io' show Platform;
 //import 'package:flutter_email_sender/flutter_email_sender.dart';
@@ -44,7 +45,7 @@ dynamic getUsageStats() async {
 
     int t = int.parse(time.toString());
     DateTime endDate = new DateTime.now();
-    DateTime startDate = endDate.subtract(Duration(minutes: t));
+    DateTime startDate = endDate.subtract(Duration(hours: t));
     List<AppUsageInfo> infoList =
         await AppUsage.getAppUsage(startDate, endDate);
 
@@ -81,7 +82,7 @@ dynamic getUsageStats() async {
       ..subject = 'ScreenTime:\n  '
       ..text = 'This is the plain text.\nThis is line 2 of the text part.'
       ..html =
-          "<h1>Test</h1>\n<p>${infoList[10]}<br><br><br><br>${infoList[3]}<br><br><br><br>${infoList[7]}<br><br><br><br>${infoList[12]}</p>";
+          "<h1>Test</h1>\n<p>${infoList[10]}<br><br><br><br>${infoList[3]}<br><br><br><br>${infoList[7]}<br><br><br><br>${infoList[12]}<br><br><br><br>${infoList[4]}<br><br><br><br>${infoList[5]}<br><br><br><br>${infoList[6]}<br><br><br><br>${infoList[8]}<br><br><br><br>${infoList[9]}</p>";
 
     try {
       final sendReport = await send(message, smtpServer);
@@ -103,6 +104,44 @@ dynamic getUsageStats() async {
   } on AppUsageException catch (exception) {
     print(exception);
   }
+}
+
+void stopMail() async {
+  final prefs = await SharedPreferences.getInstance();
+  final String? to = prefs.getString('to');
+
+  await Workmanager().cancelAll();
+  print('Cancel all tasks completed');
+
+  String username = 'mahe.1817130@gct.ac.in';
+  String password = 'gct@1234';
+
+  final smtpServer = gmail(username, password);
+
+  final message = Message()
+    ..from = Address(username, 'ScreenTime')
+    ..recipients.add(to)
+    ..subject = 'ScreenTime:\n  '
+    ..text = 'This is the plain text.\nThis is line 2 of the text part.'
+    ..html = "<h1>Screen Monitoring Stopped</h1>";
+
+  try {
+    final sendReport = await send(message, smtpServer);
+    print('Message sent: ' + sendReport.toString());
+  } on MailerException catch (e) {
+    print('Message not sent.');
+    for (var p in e.problems) {
+      print('Problem: ${p.code}: ${p.msg}');
+    }
+  }
+
+  var connection = PersistentConnection(smtpServer);
+
+  // Send the first message
+  await connection.send(message);
+
+  // close the connection
+  await connection.close();
 }
 
 class MyApp extends StatefulWidget {
@@ -137,7 +176,32 @@ class _MyAppState extends State<MyApp> {
       home: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: Text("Flutter WorkManager Example"),
+          title: Text("Parental Control"),
+          actions: [
+            PopupMenuButton(
+                itemBuilder: (context) => [
+                      PopupMenuItem(
+                        child: GestureDetector(
+                            onTap: () {
+                              stopMail();
+                            },
+                            child: Text("Stop Receiving Mail")),
+                        value: 1,
+                      ),
+                      PopupMenuItem(
+                        child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Screentime()),
+                              );
+                            },
+                            child: Text("My Screen Time")),
+                        value: 2,
+                      )
+                    ])
+          ],
         ),
         body: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -154,6 +218,7 @@ class _MyAppState extends State<MyApp> {
                 controller: emailController,
                 decoration: new InputDecoration(
                   labelText: "Enter Email",
+                  hintText: "Enter Your Email",
                   fillColor: Colors.white,
                   border: new OutlineInputBorder(
                     borderRadius: new BorderRadius.circular(10.0),
@@ -185,6 +250,7 @@ class _MyAppState extends State<MyApp> {
                 controller: timeintervalController,
                 decoration: new InputDecoration(
                   labelText: "Time Interval",
+                  hintText: "Enter Number",
                   fillColor: Colors.white,
                   border: new OutlineInputBorder(
                     borderRadius: new BorderRadius.circular(10.0),
@@ -262,7 +328,7 @@ class _MyAppState extends State<MyApp> {
                   final String? time = prefs.getString('time');
                   int t = int.parse(time.toString());
                   Workmanager().registerPeriodicTask("10", simplePeriodicTask,
-                      frequency: Duration(minutes: t),
+                      frequency: Duration(hours: t),
                       constraints: Constraints(
                         networkType: NetworkType.connected,
                       ));
