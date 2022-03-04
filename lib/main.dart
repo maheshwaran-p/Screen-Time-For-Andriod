@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:app_usage/app_usage.dart';
+//import 'package:app_usage/app_usage.dart';
 import 'package:flutter/material.dart';
+import 'package:mini_project/app_usage.dart';
 import 'package:workmanager/workmanager.dart';
 import 'dart:io' show Platform;
 //import 'package:flutter_email_sender/flutter_email_sender.dart';
@@ -42,6 +43,20 @@ dynamic getUsageStats() async {
     for (var info in infoList) {
       print(info.toString());
     }
+
+    // for (int step = 0; step < infoList.length; ++step) {
+    //   for (int i = 0; i < infoList.length - step - 1; ++i) {
+    //     if (infoList[i].usage > infoList[i + 1].usage) {
+    //       dynamic temp = infoList[i].usage;
+    //       infoList[i] = infoList[i + 1];
+    //       infoList[i + 1] = temp;
+    //     }
+    //   }
+    // }
+    // print("after sort....................................");
+    // for (var info in infoList) {
+    //   print(info.toString());
+    // }
     String username = 'mahe.1817130@gct.ac.in';
     String password = 'gct@1234';
 
