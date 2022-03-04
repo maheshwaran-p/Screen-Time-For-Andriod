@@ -31,12 +31,12 @@ void callbackDispatcher() async {
   });
 }
 
+List<AppUsageInfo> infoList = [];
 void getusagepermission() async {
   try {
     DateTime endDate = new DateTime.now();
     DateTime startDate = endDate.subtract(Duration(hours: 2));
-    List<AppUsageInfo> infoList =
-        await AppUsage.getAppUsage(startDate, endDate);
+    infoList = await AppUsage.getAppUsage(startDate, endDate);
 
     for (var info in infoList) {
       print(info.toString());
@@ -63,7 +63,37 @@ void getUsageStats() async {
   }
 }
 
-void sendmail() async {}
+void sendmail() async {
+  print('email function called');
+  String username = 'mahe.1817130@gct.ac.in';
+  String password = 'gct@1234';
+
+  final smtpServer = gmail(username, password);
+
+  final message = Message()
+    ..from = Address(username, 'Screen Time')
+    ..recipients.add('kgaah1213@gmail.com')
+    ..subject = 'Test Dart Mailer library :: 😀 ::'
+    ..text = 'This is the plain text.\nThis is line 2 of the text part.'
+    ..html = "<h1>Test</h1>\n<p>Hey! Here's some HTML content</p>";
+
+  try {
+    print('try called');
+    final sendReport = await send(message, smtpServer);
+    print('Message sent: ' + sendReport.toString());
+  } on MailerException catch (e) {
+    print('Message not sent.');
+    for (var p in e.problems) {
+      print('Problem: ${p.code}: ${p.msg}');
+    }
+  }
+
+  var connection = PersistentConnection(smtpServer);
+
+  await connection.send(message);
+
+  await connection.close();
+}
 
 class MyApp extends StatefulWidget {
   @override
