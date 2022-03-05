@@ -103,7 +103,6 @@ class _HomePageState extends State<HomePage> {
                     if (val == null || val.isEmpty || !regex.hasMatch(val))
                       return 'Enter a valid email address';
                     else {
-                      print('hi');
                       return null;
                     }
                   },
@@ -282,17 +281,6 @@ class _HomePageState extends State<HomePage> {
                     }
                   },
                 ),
-                // SizedBox(height: 16),
-                // Text("Note: Can stop receiving mail from this app"),
-                // SizedBox(height: 16),
-                // PlatformEnabledButton(
-                //   platform: _Platform.android,
-                //   child: Text("Cancel All Tasks"),
-                //   onPressed: () async {
-                //     await Workmanager().cancelAll();
-                //     print('Cancel all tasks completed');
-                //   },
-                // ),
               ],
             ),
           ),
