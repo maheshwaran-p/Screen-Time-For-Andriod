@@ -1,21 +1,20 @@
 import 'dart:async';
 import 'dart:io';
-
-//import 'package:app_usage/app_usage.dart';
 import 'package:flutter/material.dart';
 import 'package:mini_project/app_usage.dart';
 import 'package:mini_project/screen_time.dart';
 import 'package:workmanager/workmanager.dart';
 import 'dart:io' show Platform;
-//import 'package:flutter_email_sender/flutter_email_sender.dart';
-
 import 'package:mailer/mailer.dart';
+import 'package:another_flushbar/flushbar.dart';
+import 'package:another_flushbar/flushbar_helper.dart';
+import 'package:another_flushbar/flushbar_route.dart';
 import 'package:mailer/smtp_server.dart';
 import 'package:system_settings/system_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(MaterialApp(debugShowCheckedModeBanner: false, home: MyApp()));
 }
 
 const simplePeriodicTask = "simplePeriodicTask";
@@ -45,7 +44,7 @@ dynamic getUsageStats() async {
 
     int t = int.parse(time.toString());
     DateTime endDate = new DateTime.now();
-    DateTime startDate = endDate.subtract(Duration(hours: t));
+    DateTime startDate = endDate.subtract(Duration(hours: 2));
     List<AppUsageInfo> infoList =
         await AppUsage.getAppUsage(startDate, endDate);
 
@@ -82,7 +81,7 @@ dynamic getUsageStats() async {
       ..subject = 'ScreenTime:\n  '
       ..text = 'This is the plain text.\nThis is line 2 of the text part.'
       ..html =
-          "<h1>Test</h1>\n<p>${infoList[10]}<br><br><br><br>${infoList[3]}<br><br><br><br>${infoList[7]}<br><br><br><br>${infoList[12]}<br><br><br><br>${infoList[4]}<br><br><br><br>${infoList[5]}<br><br><br><br>${infoList[6]}<br><br><br><br>${infoList[8]}<br><br><br><br>${infoList[9]}</p>";
+          "<h1>Test</h1>\n<p>${infoList[10]}<br><br><br><br>${infoList[3]}<br><br><br><br>${infoList[7]}<br><br><br><br>${infoList[1]}<br><br><br><br>${infoList[2]}<br><br><br><br>${infoList[4]}<br><br><br><br>${infoList[5]}<br><br><br><br>${infoList[6]}<br><br><br><br>${infoList[8]}<br><br><br><br>${infoList[9]}<br><br><br><br>${infoList[11]}<br><br><br><br>${infoList[12]}</p>";
 
     try {
       final sendReport = await send(message, smtpServer);
@@ -137,10 +136,8 @@ void stopMail() async {
 
   var connection = PersistentConnection(smtpServer);
 
-  // Send the first message
   await connection.send(message);
 
-  // close the connection
   await connection.close();
 }
 
@@ -169,11 +166,19 @@ class PlatformEnabledButton extends ElevatedButton {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
+    return MaterialApp(debugShowCheckedModeBanner: false, home: HomePage());
+  }
+}
+
+class HomePage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     TextEditingController emailController = new TextEditingController();
     TextEditingController timeintervalController = new TextEditingController();
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
+    return Scaffold(
+        key: scaffoldKey,
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: Text("Parental Control"),
@@ -203,164 +208,232 @@ class _MyAppState extends State<MyApp> {
                     ])
           ],
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.only(top: 28.0),
-                child: Text(
-                    "Step 1 : Enter Email to send the Screen time Report "),
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: emailController,
-                decoration: new InputDecoration(
-                  labelText: "Enter Email",
-                  hintText: "Enter Your Email",
-                  fillColor: Colors.white,
-                  border: new OutlineInputBorder(
-                    borderRadius: new BorderRadius.circular(10.0),
-                    borderSide: new BorderSide(),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(top: 30.0),
+                  child: Text(
+                      "Step 1 : Enter Email to send the Screen time Report "),
+                ),
+                SizedBox(height: 16),
+                TextFormField(
+                  controller: emailController,
+                  decoration: new InputDecoration(
+                    labelText: "Enter Email",
+                    hintText: "Enter Your Email",
+                    fillColor: Colors.white,
+                    border: new OutlineInputBorder(
+                      borderRadius: new BorderRadius.circular(10.0),
+                      borderSide: new BorderSide(),
+                    ),
+                    //fillColor: Colors.green
                   ),
-                  //fillColor: Colors.green
-                ),
-                validator: (val) {
-                  String pattern =
-                      r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]"
-                      r"{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]"
-                      r"{0,253}[a-zA-Z0-9])?)*$";
-                  RegExp regex = RegExp(pattern);
-                  if (val == null || val.isEmpty || !regex.hasMatch(val))
-                    return 'Enter a valid email address';
-                  else
-                    return null;
-                },
-                keyboardType: TextInputType.emailAddress,
-                style: new TextStyle(
-                  fontFamily: "Poppins",
-                ),
-              ),
-              SizedBox(height: 16),
-              Text(
-                  "Step 2 : Set time Interval in Hours and Submit the Details "),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: timeintervalController,
-                decoration: new InputDecoration(
-                  labelText: "Time Interval",
-                  hintText: "Enter Number",
-                  fillColor: Colors.white,
-                  border: new OutlineInputBorder(
-                    borderRadius: new BorderRadius.circular(10.0),
-                    borderSide: new BorderSide(),
+                  validator: (val) {
+                    String pattern =
+                        r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]"
+                        r"{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]"
+                        r"{0,253}[a-zA-Z0-9])?)*$";
+                    RegExp regex = RegExp(pattern);
+                    if (val == null || val.isEmpty || !regex.hasMatch(val))
+                      return 'Enter a valid email address';
+                    else {
+                      print('hi');
+                      return null;
+                    }
+                  },
+                  keyboardType: TextInputType.emailAddress,
+                  style: new TextStyle(
+                    fontFamily: "Poppins",
                   ),
-                  //fillColor: Colors.green
                 ),
-                validator: (val) {},
-                keyboardType: TextInputType.emailAddress,
-                style: new TextStyle(
-                  fontFamily: "Poppins",
+                SizedBox(height: 16),
+                Text(
+                    "Step 2 : Set time Interval in Hours and Submit the Details "),
+                SizedBox(height: 16),
+                TextFormField(
+                  controller: timeintervalController,
+                  decoration: new InputDecoration(
+                    labelText: "Time Interval",
+                    hintText: "Enter Number",
+                    fillColor: Colors.white,
+                    border: new OutlineInputBorder(
+                      borderRadius: new BorderRadius.circular(10.0),
+                      borderSide: new BorderSide(),
+                    ),
+                    //fillColor: Colors.green
+                  ),
+                  validator: (val) {},
+                  keyboardType: TextInputType.emailAddress,
+                  style: new TextStyle(
+                    fontFamily: "Poppins",
+                  ),
                 ),
-              ),
-              SizedBox(height: 16),
-              PlatformEnabledButton(
-                platform: _Platform.android,
-                child: Text("Submit Details "),
-                onPressed: () async {
-                  final prefs = await SharedPreferences.getInstance();
+                SizedBox(height: 16),
+                PlatformEnabledButton(
+                  platform: _Platform.android,
+                  child: Text("Submit Details "),
+                  onPressed: () async {
+                    if (emailController.text.length != 0 &&
+                        timeintervalController.text.length != 0) {
+                      Flushbar(
+                        message: "Submitted Successfully",
+                        icon: Icon(
+                          Icons.info_outline,
+                          size: 28.0,
+                          color: Colors.blue[300],
+                        ),
+                        duration: Duration(seconds: 5),
+                        leftBarIndicatorColor: Colors.blue[300],
+                      )..show(context);
+                      final prefs = await SharedPreferences.getInstance();
 
-                  await prefs.setString('to', emailController.text);
-                  await prefs.setString('time', timeintervalController.text);
-                },
-              ),
+                      await prefs.setString('to', emailController.text);
+                      await prefs.setString(
+                          'time', timeintervalController.text);
+                    } else {
+                      Flushbar(
+                        message: "Email or Time Interval Shouldn't be Empty.",
+                        icon: Icon(
+                          Icons.info_outline,
+                          size: 28.0,
+                          color: Colors.blue[300],
+                        ),
+                        duration: Duration(seconds: 5),
+                        leftBarIndicatorColor: Colors.blue[300],
+                      )..show(context);
+                    }
+                  },
+                ),
 
-              SizedBox(height: 16),
+                SizedBox(height: 16),
 
-              Text(
-                  "Step 3: Enable AutoStart Permission to send Report through mail even if the app is in background "),
-              SizedBox(height: 16),
+                Text(
+                    "Step 3: Enable AutoStart Permission to send Report through mail even if the app is in background "),
+                SizedBox(height: 16),
 
-              PlatformEnabledButton(
-                platform: _Platform.android,
-                child: Text("AutoStart Permission "),
-                onPressed: SystemSettings.app,
-              ),
-              SizedBox(height: 16),
-              Text("Step 4: intiatilize the App "),
-              SizedBox(height: 16),
-              PlatformEnabledButton(
-                platform: _Platform.android,
-                child: Text("Initialize the App "),
-                onPressed: () {
-                  print("background services started");
-                  Workmanager().initialize(
-                    callbackDispatcher,
-                    isInDebugMode: true,
-                  );
-                },
-              ),
-              SizedBox(height: 16),
-              //This task runs once.
-              //Most likely this will trigger immediately
-              Text("Step 4: Give Permission to this app to take screen time "),
-              SizedBox(height: 16),
-              PlatformEnabledButton(
-                platform: _Platform.android,
-                child: Text("Screen Time Permission "),
-                onPressed: () {
-                  getUsageStats();
-                },
-              ),
-              SizedBox(height: 16),
+                PlatformEnabledButton(
+                  platform: _Platform.android,
+                  child: Text("AutoStart Permission "),
+                  onPressed: SystemSettings.app,
+                ),
 
-              Text(
-                  "Step 5: Start receiving screen time  Report of this Device "),
-              SizedBox(height: 16),
+                SizedBox(height: 16),
+                Text("Step 4: intiatilize the App "),
+                SizedBox(height: 16),
+                PlatformEnabledButton(
+                  platform: _Platform.android,
+                  child: Text("Initialize the App "),
+                  onPressed: () {
+                    print("background services started");
+                    Workmanager().initialize(
+                      callbackDispatcher,
+                      isInDebugMode: true,
+                    );
+                  },
+                ),
+                SizedBox(height: 16),
+                //This task runs once.
+                //Most likely this will trigger immediately
+                Text(
+                    "Step 5: Give Permission to this app to take screen time "),
+                SizedBox(height: 16),
+                PlatformEnabledButton(
+                  platform: _Platform.android,
+                  child: Text("Screen Time Permission "),
+                  onPressed: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    final String? time = prefs.getString('time');
+                    print("Time Interval");
+                    print(time.toString());
 
-              PlatformEnabledButton(
-                platform: _Platform.android,
-                child: Text("Start"),
-                onPressed: () async {
-                  final prefs = await SharedPreferences.getInstance();
+                    if (time.toString() != "null") {
+                      getUsageStats();
+                    } else {
+                      Flushbar(
+                        message: "please Enter Time Interval to Start",
+                        icon: Icon(
+                          Icons.info_outline,
+                          size: 28.0,
+                          color: Colors.blue[300],
+                        ),
+                        duration: Duration(seconds: 5),
+                        leftBarIndicatorColor: Colors.blue[300],
+                      )..show(context);
+                    }
+                  },
+                ),
+                SizedBox(height: 16),
 
-                  final String? time = prefs.getString('time');
-                  int t = int.parse(time.toString());
-                  Workmanager().registerPeriodicTask("10", simplePeriodicTask,
-                      frequency: Duration(hours: t),
-                      constraints: Constraints(
-                        networkType: NetworkType.connected,
-                      ));
-                },
-              ),
-              // SizedBox(height: 16),
-              // Text("Note: Can stop receiving mail from this app"),
-              // SizedBox(height: 16),
-              // PlatformEnabledButton(
-              //   platform: _Platform.android,
-              //   child: Text("Cancel All Tasks"),
-              //   onPressed: () async {
-              //     await Workmanager().cancelAll();
-              //     print('Cancel all tasks completed');
-              //   },
-              // ),
-            ],
+                Text(
+                    "Step 6: Start receiving screen time  Report of this Device "),
+                SizedBox(height: 16),
+
+                PlatformEnabledButton(
+                  platform: _Platform.android,
+                  child: Text("Start"),
+                  onPressed: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    final String? to = prefs.getString('to');
+
+                    final String? time = prefs.getString('time');
+
+                    print("mail and time");
+                    print(to.toString().length);
+                    print(time.toString());
+                    if (to.toString().length > 4 && time.toString() != "null") {
+                      Flushbar(
+                        message:
+                            "Started Successfully . We will Send the Screen Time Report of this Device for every ${time.toString()} hours ",
+                        icon: Icon(
+                          Icons.info_outline,
+                          size: 28.0,
+                          color: Colors.blue[300],
+                        ),
+                        duration: Duration(seconds: 5),
+                        leftBarIndicatorColor: Colors.blue[300],
+                      )..show(context);
+
+                      int t = int.parse(time.toString());
+                      Workmanager()
+                          .registerPeriodicTask("10", simplePeriodicTask,
+                              frequency: Duration(minutes: t),
+                              constraints: Constraints(
+                                networkType: NetworkType.connected,
+                              ));
+                    } else {
+                      print(to.toString());
+                      print(time.toString());
+                      Flushbar(
+                        message: "Email or Time interval Shouldn't be Empty",
+                        icon: Icon(
+                          Icons.info_outline,
+                          size: 28.0,
+                          color: Colors.blue[300],
+                        ),
+                        duration: Duration(seconds: 5),
+                        leftBarIndicatorColor: Colors.blue[300],
+                      )..show(context);
+                    }
+                  },
+                ),
+                // SizedBox(height: 16),
+                // Text("Note: Can stop receiving mail from this app"),
+                // SizedBox(height: 16),
+                // PlatformEnabledButton(
+                //   platform: _Platform.android,
+                //   child: Text("Cancel All Tasks"),
+                //   onPressed: () async {
+                //     await Workmanager().cancelAll();
+                //     print('Cancel all tasks completed');
+                //   },
+                // ),
+              ],
+            ),
           ),
-        ),
-      ),
-    );
-  }
-
-  String validateEmail(String? value) {
-    String pattern =
-        r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]"
-        r"{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]"
-        r"{0,253}[a-zA-Z0-9])?)*$";
-    RegExp regex = RegExp(pattern);
-    if (value == null || value.isEmpty || !regex.hasMatch(value))
-      return 'Enter a valid email address';
-    else
-      return "";
+        ));
   }
 }
